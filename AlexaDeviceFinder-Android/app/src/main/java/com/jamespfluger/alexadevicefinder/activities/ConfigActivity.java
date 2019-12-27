@@ -1,6 +1,9 @@
 package com.jamespfluger.alexadevicefinder.activities;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,8 +22,10 @@ import com.amazon.identity.auth.device.api.Listener;
 import com.amazon.identity.auth.device.api.authorization.AuthorizationManager;
 import com.amazon.identity.auth.device.api.authorization.User;
 import com.amazon.identity.auth.device.api.workflow.RequestContext;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.jamespfluger.alexadevicefinder.CommonTools;
@@ -50,6 +55,17 @@ public class ConfigActivity extends AppCompatActivity {
         authService = new AuthService();
     
         establishUserDevicePair();
+
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted()) {
+
+            Intent intent = new Intent(
+                    android.provider.Settings
+                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -160,11 +176,11 @@ public class ConfigActivity extends AppCompatActivity {
 
     private void setDeviceId(){
         FirebaseInstanceId.getInstance().getInstanceId()
-            .addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                 @Override
-                public void onSuccess(InstanceIdResult instanceIdResult) {
-                    deviceId = instanceIdResult.getId();
-                    updateUserDevice();
+                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                deviceId = task.getResult().getToken();
+                updateUserDevice();
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
