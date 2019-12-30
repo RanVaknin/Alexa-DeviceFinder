@@ -43,7 +43,7 @@ public final class NotificationService {
     public void issueNotification(String title, String message){
         Uri defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE);
 
-        setDeviceToMaxVolume();
+        //setDeviceToMaxVolume();
 
         if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
             createNotificationChannel("Device Alert (Required)");
@@ -64,7 +64,6 @@ public final class NotificationService {
             e.printStackTrace();
         }
 
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Ringtone r =  RingtoneManager.getRingtone(context, Uri.parse("android.resource://com.jamespfluger.alexadevicefinder/" + R.raw.alert));
         r.play();
     }
@@ -72,14 +71,13 @@ public final class NotificationService {
     @RequiresApi(api= Build.VERSION_CODES.O)
     private void createNotificationChannel(String channelName){
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
-        Uri defaultRingtoneUri = RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE);
 
-        AudioAttributes att = new AudioAttributes.Builder()
+        AudioAttributes ringtoneAttributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build();
 
-        channel.setSound(Uri.parse("android.resource://com.jamespfluger.alexadevicefinder/" + R.raw.alert), att);
+        channel.setSound(Uri.parse("android.resource://com.jamespfluger.alexadevicefinder/" + R.raw.alert), ringtoneAttributes);
 
         notificationBuilder.setChannelId(CHANNEL_ID);
         notificationManager.createNotificationChannel(channel);

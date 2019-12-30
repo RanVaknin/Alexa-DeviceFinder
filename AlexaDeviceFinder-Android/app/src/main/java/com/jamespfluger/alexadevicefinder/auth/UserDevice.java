@@ -24,7 +24,5 @@ public class UserDevice {
     }
 
     @Override
-    public String toString(){
-        return "userid:" + userId + "   " + "deviceid:" + deviceId;
-    }
+    public String toString(){ return userId + ":" + deviceId; }
 }

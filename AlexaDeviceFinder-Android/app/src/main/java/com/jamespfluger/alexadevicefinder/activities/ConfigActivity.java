@@ -3,8 +3,11 @@ package com.jamespfluger.alexadevicefinder.activities;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -58,13 +61,19 @@ public class ConfigActivity extends AppCompatActivity {
 
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted()) {
-
-            Intent intent = new Intent(
-                    android.provider.Settings
-                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-
-            startActivity(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(!notificationManager.isNotificationPolicyAccessGranted()) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                startActivity(intent);
+            }
+            Intent intent = new Intent();
+            String packageName = getPackageName();
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
         }
     }
 
@@ -186,7 +195,7 @@ public class ConfigActivity extends AppCompatActivity {
             .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    CommonTools.ShowToast(getApplicationContext(), "Error receiving Firebase token");
+                    CommonTools.ShowToast(getApplicationContext(), "Error receiving Firebase token.\nPlease log in again");
                 }
             });
     }
@@ -195,23 +204,5 @@ public class ConfigActivity extends AppCompatActivity {
         if(userId!=null && deviceId!=null){
             authService.addUserDevice(userId, deviceId);
         }
-    }
-
-    //TODO: remove this; debug only
-    private void logUserDeviceInfo(String title, ArrayList<UserDevice> userDevices){
-        Log.d("TEST", "---------------------------------------------------------------------");
-        Log.d("TEST", title);
-
-        if(userDevices==null){
-            Log.d("TEST", "UserDevices==null");
-        }
-        else if(userDevices.size()==0){
-            Log.d("TEST", "UserDevices.size==0");
-        }
-        else{
-            for(UserDevice userDevice : userDevices)
-                Log.d("TEST", userDevice.toString());
-        }
-        Log.d("TEST", "---------------------------------------------------------------------");
     }
 }

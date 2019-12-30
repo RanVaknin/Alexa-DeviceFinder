@@ -19,9 +19,7 @@ public class FirebaseService extends FirebaseMessagingService {
 
         NotificationService notificationService = new NotificationService(getApplicationContext());
 
-        //String title = remoteMessage.getNotification().getTitle();
-        //String body = remoteMessage.getNotification().getBody();
-        String title = remoteMessage.getData().get("body");
+        String title = remoteMessage.getData().get("title");
         String body = remoteMessage.getData().get("body");
 
         notificationService.issueNotification(title, body);
